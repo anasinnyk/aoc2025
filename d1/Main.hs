@@ -16,12 +16,8 @@ parse str = map lineToAction (lines str)
     lineToAction _                 = error "Parse error"
 
 findThePoint :: Action -> Int -> (Int, Int)
-findThePoint (L x) p | p - x == 0   = (p - x, 1)
-findThePoint (R x) p | p + x == 100 = (mod (p + x) 100, 1)
-findThePoint (L x) p | p - x >  0   = (p - x, 0)
-findThePoint (R x) p | p + x <  100 = (p + x, 0)
-findThePoint (L x) p | p - x <=  0   = (mod (p - x) 100, if p > 0 then div (p - x) 100 else div (abs (p-x)) 100)
-findThePoint (R x) p | p + x >=  100 = (mod (p + x) 100, div (p + x) 100)
+findThePoint (L x) p = (mod (p-x) 100, div x 100 + (if p <= (mod x 100) && p /= 0 then 1 else 0))
+findThePoint (R x) p = (mod (p+x) 100, div (p+x) 100)
 
 findTheCode :: Int -> [Action] -> [(Int, Int)]
 findTheCode _ [] = []
@@ -35,4 +31,4 @@ testFindTheCode f = do
 testFindTheCode' :: FilePath -> IO ()
 testFindTheCode' f = do
   inp <- input f
-  putStrLn $ show $ sum $ map (abs . snd) $ findTheCode 50 $ parse inp
+  putStrLn $ show $ sum $ map snd $ findTheCode 50 $ parse inp
