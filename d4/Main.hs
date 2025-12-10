@@ -1,6 +1,6 @@
 {-# LANGUAGE TupleSections #-}
 
-import Data.Map as M (Map, filter, fromList, insert, size, (!))
+import Data.Map as M (Map, filter, fromList, insert, map, size, (!))
 
 main :: IO ()
 main = do
@@ -10,13 +10,16 @@ input :: FilePath -> IO String
 input = readFile
 
 parse :: String -> Map Int (Map Int Char)
-parse s = fromList . zip [1 ..] $ map (fromList . zip [1 ..]) $ lines s
+parse s = fromList . zip [1 ..] $ Prelude.map (fromList . zip [1 ..]) $ lines s
 
 emptyRow :: Int -> Map Int Char
-emptyRow s = fromList $ take s $ map (,emptyElement) [1 ..]
+emptyRow s = fromList $ take s $ Prelude.map (,emptyElement) [1 ..]
 
 emptyElement :: Char
 emptyElement = '.'
+
+xElement :: Char
+xElement = 'x'
 
 addEmptySquer :: Map Int (Map Int Char) -> Map Int (Map Int Char)
 addEmptySquer m =
@@ -53,9 +56,33 @@ updateWithXBy x y m =
       ]
     rollsWithNeigborsSize = length $ Prelude.filter (/= emptyElement) rollNeigbors
    in
-    updateWithXBy x (y - 1) $ if 5 <= rollsWithNeigborsSize then m else insert x (insert y 'X' $ m ! x) m
+    updateWithXBy x (y - 1) $ if 5 <= rollsWithNeigborsSize then m else insert x (insert y xElement $ m ! x) m
 
 solve :: FilePath -> IO ()
 solve f = do
   inp <- input f
-  print $ foldr (\m acc -> acc + size (M.filter (== 'X') m)) 0 $ updateWithX $ addEmptySquer $ parse inp
+  print $ countX $ updateWithX $ addEmptySquer $ parse inp
+
+countX :: Map Int (Map Int Char) -> Int
+countX = foldr (\m acc -> acc + size (M.filter (== xElement) m)) 0
+
+removeX :: Map Int (Map Int Char) -> Map Int (Map Int Char)
+removeX =
+  let
+    changeXToEmpty a | a == xElement = emptyElement
+    changeXToEmpty a = a
+   in
+    fmap (M.map changeXToEmpty)
+
+solveAllRolls :: Int -> Map Int (Map Int Char) -> Int
+solveAllRolls acc m | countX (updateWithX m) == 0 = acc
+solveAllRolls acc m =
+  let
+    m' = updateWithX m
+   in
+    solveAllRolls (acc + countX m') (removeX m')
+
+solve' :: FilePath -> IO ()
+solve' f = do
+  inp <- input f
+  print $ solveAllRolls 0 $ addEmptySquer $ parse inp
