@@ -43,3 +43,12 @@ filterFresh d =
     isFresh x ((s, e) : ss) = (x >= s && x <= e) || isFresh x ss
    in
     filter (`isFresh` rangeFreshIDs) availableIDs
+
+genRanges :: [(Int, Int)] -> Int
+genRanges [] = 0
+genRanges ((s, e) : xs) = e - s + 1 + genRanges xs
+
+solve' :: FilePath -> IO ()
+solve' f = do
+  inp <- input f
+  print $ genRanges $ tail $ fst $ parse inp
