@@ -2,7 +2,7 @@ import Data.Array as A (Array, array, assocs, bounds, listArray, range, (!), (//
 
 main :: IO ()
 main = do
-  putStrLn "AOC 2025 #6"
+  putStrLn "AOC 2025 #7"
 
 input :: FilePath -> IO String
 input = readFile
